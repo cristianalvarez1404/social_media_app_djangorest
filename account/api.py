@@ -12,8 +12,6 @@ def me(request):
     'email': request.user.email
   })
 
-
-
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([])
