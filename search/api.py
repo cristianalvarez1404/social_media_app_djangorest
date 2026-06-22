@@ -22,3 +22,4 @@ def search(request):
     'users':users_serializer,
     'posts':posts_serializer
   },safe=False)
+
