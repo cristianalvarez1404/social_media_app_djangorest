@@ -1,0 +1,25 @@
+from rest_framework import serializers
+from account.serializer import UserSerializer
+from .models import Conversation, ConversationMessage
+
+class ConversationSerializer(serializers.ModelSerializer):
+  users = UserSerializer(read_only=True, many=True)
+
+  class Meta:
+    model = Conversation
+    fields = ('id', 'users', 'modified_at_formatted',)
+
+class ConversationMessageSerializer(serializers.ModelSerializer):
+  sent_to = UserSerializer(read_only=True, many=True)
+  created_by = UserSerializer(read_only=True, many=True)
+
+  class Meta:
+    model = ConversationMessage
+    fields = ('id', 'send_to','created_by', 'created_at_formatted','body',)
+
+class ConversationDetailSerializer(serializers.ModelSerializer):
+  messages = ConversationMessageSerializer(read_only=True, many=True)
+
+  class Meta:
+    model = Conversation
+    fields = ('id', 'users', 'modified_at_formatted', 'messages',)
