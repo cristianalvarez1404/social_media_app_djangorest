@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 #models
-from .models import Post, Like, Comment
+from .models import Post, Like, Comment, Trend
 from account.models import User
 
 #forms
@@ -11,7 +11,7 @@ from .forms import PostForm
 
 #serializers
 from account.serializer import UserSerializer
-from .serializers import PostSerializer, PostDetailSerializer, CommentSerializer
+from .serializers import PostSerializer, PostDetailSerializer, CommentSerializer, TrendSerializer
 
 @api_view(['GET'])
 def post_list(request):
@@ -83,5 +83,12 @@ def post_create_comment(request, pk):
   post.save()
 
   serializer = CommentSerializer(comment)
+
+  return JsonResponse(serializer.data, safe=False)
+
+@api_view(['GET'])
+def get_trends(request):
+  trends = Trend.objects.all()
+  serializer = TrendSerializer(trends, many=True)
 
   return JsonResponse(serializer.data, safe=False)
