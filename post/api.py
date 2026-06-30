@@ -21,6 +21,12 @@ def post_list(request):
     user_ids.append(user.id)
 
   posts = Post.objects.filter(created_by_id__in=list(user_ids))
+  
+  trend = request.GET.get('trend', '')
+
+  if trend:
+    posts = posts.filter(body__icontains='#' + trend)
+
   serializer = PostSerializer(posts, many=True)
 
   return JsonResponse(serializer.data, safe=False)
@@ -51,6 +57,10 @@ def post_create(request):
     post = form.save(commit=False)
     post.created_by = request.user #added authomatically by Django when we login
     post.save()
+
+    user = request.user
+    user.posts_count = user.posts_count + 1
+    user.save()
 
     serializer = PostSerializer(post)
 

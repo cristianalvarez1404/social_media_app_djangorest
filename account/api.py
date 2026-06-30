@@ -2,7 +2,7 @@ from django.http import JsonResponse
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from .forms import SignupForm
+from .forms import SignupForm, ProfileForm
 from .models import FriendshipRequest, User
 from .serializer import UserSerializer,FriendsRequestSerializer
 
@@ -11,7 +11,8 @@ def me(request):
   return JsonResponse({
     'id': request.user.id,
     'name': request.user.name,
-    'email': request.user.email
+    'email': request.user.email,
+    'avatar': request.user.get_avatar()
   })
 
 @api_view(['POST'])
@@ -30,13 +31,12 @@ def signup(request):
 
   if form.is_valid():
     form.save()
-
     #TODO Send verification email later!
 
   else:
-    message = 'error'
+    message = form.errors.as_json()
 
-  return JsonResponse({'status': message})
+  return JsonResponse({'message': message}, safe=False)
 
 @api_view(['GET'])
 def friends(request, pk):
@@ -63,6 +63,22 @@ def friends(request, pk):
     'requests': requests
   }, safe=False)
 
+@api_view(['POST'])
+def edit_profile(request):
+  user = request.user
+  email = request.data.get('email')
+
+  if User.objects.exclude(id=user.id).filter(email = email).exists():
+    return JsonResponse({'message':'email already exists'})
+  else:
+    form = ProfileForm(request.data, request.FILES ,instance=user)
+    
+    if form.is_valid():
+      form.save()
+  
+    serializer = UserSerializer(user)
+
+  return JsonResponse({'message':'information updated','user':serializer.data})
 
 @api_view(['POST'])
 def send_friendship_request(request, pk):
